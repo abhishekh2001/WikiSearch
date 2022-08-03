@@ -1,12 +1,16 @@
+from collections import defaultdict
+
+
 class Indexer:
     """Indexes the corpus using inverted indexing"""
 
-    def __init__(self, fpath):
+    def __init__(self, fpath, parser):
         """Creates an inverted index from XML document
         :param fpath: path to XML document containing corpus
+        :param parser: object implementing xml parsing
         """
-
-        self.index = {}
+        self.index = defaultdict()
+        self.parser = parser
         self.fpath = fpath
         self.doc = None
 
