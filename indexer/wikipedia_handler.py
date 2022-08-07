@@ -9,15 +9,15 @@ class WikipediaHandler(ContentHandler):
         :param indexer: implements the indexing functionality
         """
         print("init wiki content handler")
+        self.reqd_tags = {"title", "text"}
         self.data = ""
-        self.tag = "'"
+        self.tag = ""
+        self.doc_name = ""
         self.indexer = indexer
 
-    def startDocument(self):
-        print("Starting doc")
-
     def characters(self, content):
-        self.data += content
+        if self.tag in self.reqd_tags:
+            self.data += content
 
     def startElement(self, name, attrs):
         self.tag = name
@@ -26,3 +26,7 @@ class WikipediaHandler(ContentHandler):
     def endElement(self, name):
         print("name is actually", name)
         print(f"ending {self.tag}, data: {self.data}")
+        if self.tag == 'title':
+            self.doc_name = self.data
+        if self.tag == 'text':
+            self.indexer.parse_document(self.doc_name, self.data)

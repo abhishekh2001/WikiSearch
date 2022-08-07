@@ -11,10 +11,17 @@ class Indexer:
         """
         self.index = defaultdict()
         self.fpath = fpath
+        self.cur_content = None
+        self.titles = []
         self.doc = None
 
-    def parse(self):
-        """Parses the corpus"""
+    def parse_document(self, title, content):
+        self.titles.append(title)
+        self.cur_content = content
+        self.preprocess()
+
+    def preprocess(self):
+        """Performs all the text pre-processing for current content held"""
         pass
 
     def tokenize(self, t):
