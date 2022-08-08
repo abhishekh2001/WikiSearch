@@ -1,5 +1,11 @@
 from collections import defaultdict
-from xml.sax.handler import ContentHandler
+from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+import re
+
+
+stops = set(stopwords.words('english'))
 
 
 class Indexer:
@@ -14,28 +20,35 @@ class Indexer:
         self.cur_content = None
         self.titles = []
         self.doc = None
+        self.stemmer = PorterStemmer(PorterStemmer.ORIGINAL_ALGORITHM)
 
     def parse_document(self, title, content):
         self.titles.append(title)
         self.cur_content = content
-        self.preprocess()
+        self.preprocess(content)
 
-    def preprocess(self):
+    def preprocess(self, data=None):
         """Performs all the text pre-processing for current content held"""
-        pass
+        data = self.tokenize(data)
+        data = [t.lower() for t in data]
+        data = [t for t in data if t not in stops]
+        data = self.stem(data)
+        return data
 
-    def tokenize(self, t):
+    def tokenize(self, data):
         """Performs tokenization"""
-        pass
+        data = re.sub(r'[\'-]', '', data)
+        data = re.sub(r'[^a-zA-z0-9]', ' ', data)
+        return data.split()
 
-    def cfold(self, t):
+    def cfold(self, data):
         """Performs case folding"""
-        pass
+        return [t.lower() for t in data]
 
-    def remove_stop_words(self, t):
+    def remove_stop_words(self, data):
         """removes stop words"""
-        pass
+        return [t for t in data if t not in stops]
 
-    def stem(self, t):
+    def stem(self, data):
         """Performs stemming"""
-        pass
+        return [self.stemmer.stem(t) for t in data]
