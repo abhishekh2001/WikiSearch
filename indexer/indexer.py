@@ -11,13 +11,15 @@ stops = set(stopwords.words('english'))
 class Indexer:
     """Indexes the corpus using inverted indexing"""
 
-    def __init__(self, fpath):
+    def __init__(self, fpath, content_parser):
         """Creates an inverted index from documents
         :param fpath: path to XML document containing corpus
+        :param content_parser: parses document with custom formatting
         """
         self.index = defaultdict()
         self.fpath = fpath
         self.cur_content = None
+        self.parser = content_parser
         self.titles = []
         self.doc = None
         self.stemmer = PorterStemmer(PorterStemmer.ORIGINAL_ALGORITHM)
@@ -25,6 +27,9 @@ class Indexer:
     def parse_document(self, title, content):
         self.titles.append(title)
         self.cur_content = content
+        field_information = self.parser.parse(content)
+        # for field, information in field_information.items():
+        #    self.preprocess(information)
         self.preprocess(content)
 
     def preprocess(self, data=None):
