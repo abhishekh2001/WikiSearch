@@ -1,4 +1,6 @@
 from xml.sax.handler import ContentHandler
+import re
+from collections import defaultdict
 
 
 class WikipediaHandler(ContentHandler):
@@ -37,11 +39,40 @@ class WikipediaParser:
 
     def __init__(self):
         """parses data having wiki formatting"""
-        pass
+        self.content = None
+        self.fields = {
+            "body": self._body,
+            "infobox": self._infobox,
+            "category": self._category,
+            "links": self._links,
+            "references": self._references
+        }
 
-    def parse(self, content):
+    def parse(self, content) -> dict:
         """Parses the wiki page and returns dictionary of fields and values
         :param content: string of wikipedia page
-        :returns dict: keys of fields with values as field data
+        :returns: (dict) keys of fields with values as field data
         """
-        pass
+        res = defaultdict()
+        self.content = content
+        print(content)
+
+        for field, function in self.fields.items():
+            res[field] = function()
+
+        return res
+
+    def _body(self):
+        return ""
+
+    def _infobox(self):
+        return ""
+
+    def _category(self):
+        return ""
+
+    def _links(self):
+        return ""
+
+    def _references(self):
+        return ""
