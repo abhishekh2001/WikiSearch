@@ -62,17 +62,38 @@ class WikipediaParser:
 
         return res
 
+    def _clean(self):
+        """Sanitize response from wiki parsing"""
+        pass
+
     def _body(self):
         return ""
 
     def _infobox(self):
-        return ""
+        t = re.findall('({{infobox.*?}})', self.content)
+
+        try:
+            t = t[0]
+        except IndexError:
+            return ""
+
+        t = re.split(r'\|.*?=', t)
+        t = ' '.join(t[1:])
+        return t
 
     def _category(self):
-        return ""
+        t = re.findall(r'(\[\[category.*?]])', self.content)
+        t = ' '.join([re.sub(r'\[\[category:|]', '', x) for x in t])
+        print(t)
+        return t
 
     def _links(self):
         return ""
 
     def _references(self):
+        # TODO: has to be <ref -- "reference" gets caught go para by para?
+        t = re.findall(r'ref.*?/ref', self.content)
+        t = [re.findall(r'title.*?\|', x) for x in t]
+        t = [re.sub(r'title', ' ', x[0]) for x in t if len(x)]
+        print(t)
         return ""
