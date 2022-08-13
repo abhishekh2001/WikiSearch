@@ -55,7 +55,6 @@ class WikipediaParser:
         """
         res = defaultdict()
         self.content = content
-        print(content)
 
         for field, function in self.fields.items():
             res[field] = function()
@@ -84,16 +83,18 @@ class WikipediaParser:
     def _category(self):
         t = re.findall(r'(\[\[category.*?]])', self.content)
         t = ' '.join([re.sub(r'\[\[category:|]', '', x) for x in t])
-        print(t)
         return t
 
     def _links(self):
-        return ""
+        # TODO: external links not in below format? look: we_3.txt IMP
+        t = re.findall(r'\*\[.*?]', self.content)
+        t = ' '.join(t)
+        return t
 
     def _references(self):
-        # TODO: has to be <ref -- "reference" gets caught go para by para?
-        t = re.findall(r'ref.*?/ref', self.content)
+        t = re.findall(r'&lt;ref.*?&lt;/ref', self.content)
+        print('found refs ', t)
         t = [re.findall(r'title.*?\|', x) for x in t]
         t = [re.sub(r'title', ' ', x[0]) for x in t if len(x)]
-        print(t)
-        return ""
+        t = ' '.join(t)
+        return t
