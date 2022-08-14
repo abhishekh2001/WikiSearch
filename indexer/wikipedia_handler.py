@@ -10,12 +10,12 @@ class WikipediaHandler(ContentHandler):
         """SAX API parses doc and creates index
         :param indexer: implements the indexing functionality
         """
-        print("init wiki content handler")
         self.reqd_tags = {"title", "text"}
         self.data = ""
         self.tag = ""
         self.doc_name = ""
         self.indexer = indexer
+        self.num_pages = 0
 
     def characters(self, content):
         if self.tag in self.reqd_tags:
@@ -26,8 +26,6 @@ class WikipediaHandler(ContentHandler):
         self.data = ""
 
     def endElement(self, name):
-        print("name is actually", name)
-        print(f"ending {self.tag}, data: {self.data}")
         if self.tag == 'title':
             self.doc_name = self.data
         if self.tag == 'text':  # TODO: consider page as end element
@@ -54,7 +52,7 @@ class WikipediaParser:
         :returns: (dict) keys of fields with values as field data
         """
         res = defaultdict()
-        self.content = content
+        self.content = content.lower()
 
         for field, function in self.fields.items():
             data = function()
