@@ -57,28 +57,38 @@ class WikipediaParser:
         self.content = content
 
         for field, function in self.fields.items():
-            res[field] = function()
+            data = function()
+            res[field] = self._clean(data)
 
         return res
 
-    def _clean(self):
+    def _clean(self, data):
         """Sanitize response from wiki parsing"""
-        pass
+        data = re.sub(r'https?://\S+', '', data)
+        data = re.sub(r'&nbsp|&lt|&gt|&amp|&quot|&apos', '', data)
+        data = re.sub(r'[^a-zA-Z -]', ' ', data)
+        data = " ".join(data.split())
+        return data
 
     def _body(self):
-        return ""
+        t = re.sub(r'\{\{.*?}}|\[\[category.*?]]|==.*?==', ' ', self.content, flags=re.DOTALL)
+        return t
 
     def _infobox(self):
-        t = re.findall('({{infobox.*?}})', self.content)
+        t = re.split(r'\{\{infobox', self.content)
 
         try:
-            t = t[0]
+            t = t[1].split('\n')
         except IndexError:
             return ""
 
-        t = re.split(r'\|.*?=', t)
-        t = ' '.join(t[1:])
-        return t
+        infobox = []
+        for x in t:
+            if re.search(r'^}}', x):
+                break
+            infobox.append(re.sub(r'\|.*?=', '', x))
+        infobox = ' '.join(infobox)
+        return infobox
 
     def _category(self):
         t = re.findall(r'(\[\[category.*?]])', self.content)
@@ -86,15 +96,11 @@ class WikipediaParser:
         return t
 
     def _links(self):
-        # TODO: external links not in below format? look: we_3.txt IMP
-        t = re.findall(r'\*\[.*?]', self.content)
+        t = re.findall(r'==external links==.*?\n\n', self.content, flags=re.DOTALL)
         t = ' '.join(t)
         return t
 
     def _references(self):
-        t = re.findall(r'&lt;ref.*?&lt;/ref', self.content)
-        print('found refs ', t)
-        t = [re.findall(r'title.*?\|', x) for x in t]
-        t = [re.sub(r'title', ' ', x[0]) for x in t if len(x)]
+        t = re.findall(r'&lt;ref&gt(.*?)?&lt;/ref', self.content, flags=re.DOTALL)
         t = ' '.join(t)
         return t

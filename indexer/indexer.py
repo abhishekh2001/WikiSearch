@@ -27,15 +27,14 @@ class Indexer:
     def parse_document(self, title, content):
         self.titles.append(title)
         self.cur_content = content
-        field_information = self.parser.parse(content)
-        # for field, information in field_information.items():
-        #    self.preprocess(information)
-        self.preprocess(content)
+        field_data = self.parser.parse(content)
+        for field, information in field_data.items():
+            self.preprocess(information)
+        # self.preprocess(content)
 
     def preprocess(self, data=None):
         """Performs all the text pre-processing for current content held"""
         data = self.tokenize(data)
-        data = [t.lower() for t in data]
         data = [t for t in data if t not in stops]
         data = self.stem(data)
         return data
