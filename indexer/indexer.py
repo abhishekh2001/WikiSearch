@@ -1,9 +1,10 @@
 from collections import defaultdict, Counter
 from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
+import time
 import os
 from os import path
 from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
+import Stemmer
 import re
 import config
 
@@ -28,15 +29,18 @@ class Indexer:
         self.parser = content_parser
         self.titles = []
         self.doc = None
-        self.stemmer = PorterStemmer(PorterStemmer.ORIGINAL_ALGORITHM)
+        self.stemmer = Stemmer.Stemmer('english')
         self.root_path = 'tmp/' if root_path is None else root_path
+        self._prev_time = time.time()
+        self.stemmed_words = dict()
 
         if not path.isdir(self.root_path):
             os.mkdir(self.root_path)
 
     def parse_document(self, title, content):
         self.titles.append(title.encode('ascii', errors='ignore').decode())
-        self.cur_content = content
+        self.cur_content = content.encode('ascii', errors='ignore').decode()
+
         field_data = self.parser.parse(content)
         for field, information in field_data.items():
             self.index[field] = self.preprocess(information)
@@ -46,7 +50,10 @@ class Indexer:
 
         self.doc_id += 1
 
-        if self.doc_id % 20000 == 0:
+        if self.doc_id % 30000 == 0:  # 20:55:18
+            now = time.time()
+            print('handling doc id', self.doc_id, ' time =', now - self._prev_time)
+            self._prev_time = now
             self.dump()
             self._reset()
 
@@ -63,13 +70,13 @@ class Indexer:
 
         idx_content = []
         for w in sorted(self.inv_index.keys()):
-            idx_content.append(' '.join(w + ':' + self.inv_index[w]))
+            idx_content.append(w + ':' + ''.join(self.inv_index[w]))
         idx_content = '\n'.join(idx_content)
 
         with open(path.join(self.root_path, f'idx{self._file_id}.txt'), 'w') as f:
             f.write(idx_content)
 
-        with open(path.join(self.root_path, f'title.txt'), 'a') as f:
+        with open(path.join(self.root_path, f'title{self._file_id}.txt'), 'w') as f:
             f.write('\n'.join(self.titles))
 
         self._file_id += 1
@@ -91,26 +98,16 @@ class Indexer:
         """Performs all the text pre-processing for current content held"""
         data = self.tokenize(data)
         data = [t for t in data if t not in stops]
-        data = self.stem(data)
+        data = self.stemmer.stemWords(data)
         return data
 
     def tokenize(self, data):
         """Performs tokenization"""
-        data = data.encode('ascii', errors='ignore').decode()
-        data = re.sub(r'[\'-]', '', data)
-        data = re.sub(r'[^a-zA-z0-9]', ' ', data)
         data = data.split()
         data = [x for x in data if config.MINLEN <= len(x) <= config.MAXLEN]
         return data
 
-    def cfold(self, data):
-        """Performs case folding"""
-        return [t.lower() for t in data]
-
-    def remove_stop_words(self, data):
-        """removes stop words"""
-        return [t for t in data if t not in stops]
-
     def stem(self, data):
         """Performs stemming"""
-        return [self.stemmer.stem(t) for t in data]
+        return self.stemmer.stemWords(data)
+        # return [self.stemmer.stem(t) for t in data]

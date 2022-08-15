@@ -62,10 +62,8 @@ class WikipediaParser:
 
     def _clean(self, data):
         """Sanitize response from wiki parsing"""
-        data = re.sub(r'https?://\S+', '', data)
-        data = re.sub(r'&nbsp|&lt|&gt|&amp|&quot|&apos', '', data)
-        data = re.sub(r'[^a-zA-Z -]', ' ', data)
-        data = " ".join(data.split())
+        data = re.sub(r'https?://\S+|&nbsp|&lt|&gt|&amp|&quot|&apos|\S*\d\S*', '', data)
+        data = re.sub(r'[^a-z -]', ' ', data)
         return data
 
     def _body(self):
@@ -90,7 +88,7 @@ class WikipediaParser:
 
     def _category(self):
         t = re.findall(r'(\[\[category.*?]])', self.content)
-        t = ' '.join([re.sub(r'\[\[category:|]', '', x) for x in t])
+        t = ' '.join([re.sub(r'\[\[category:', '', x) for x in t])
         return t
 
     def _links(self):
