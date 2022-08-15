@@ -28,7 +28,7 @@ class WikipediaHandler(ContentHandler):
     def endElement(self, name):
         if self.tag == 'title':
             self.doc_name = self.data
-        if self.tag == 'text':  # TODO: consider page as end element
+        if self.tag == 'text':
             self.indexer.parse_document(self.doc_name, self.data)
 
 

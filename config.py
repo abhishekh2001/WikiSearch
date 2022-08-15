@@ -1,0 +1,2 @@
+MINLEN = 3
+MAXLEN = 9
