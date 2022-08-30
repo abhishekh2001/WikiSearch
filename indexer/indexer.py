@@ -3,13 +3,11 @@ from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
 import time
 import os
 from os import path
-from nltk.corpus import stopwords
 import Stemmer
-import re
 import config
 
 
-stops = set(stopwords.words('english'))
+stops = {"couldn't", 'them', 'if', 'off', 'not', "needn't", 'ours', 'had', 'now', 'don', 'have', "won't", 'has', 'shan', 'isn', 'any', 'at', 'no', 'an', 'mightn', 'who', 'is', 'doing', 'a', 'there', 'of', 'before', 'do', 'up', 'shouldn', 'all', 'couldn', 'so', 'they', 'such', 'which', 'aren', "haven't", 'against', 'she', 'both', 'during', 'y', "didn't", 'yours', 'more', 'further', 'itself', 'yourselves', 'on', 'should', 'haven', 'over', 't', 'how', 'are', 'its', 'when', 'some', 'own', "she's", "should've", 'down', 'why', 'under', 's', 'your', 'his', 'each', "hadn't", 'ourselves', 'above', 'can', 'then', 'won', "doesn't", "hasn't", 'in', 'he', 'didn', 'again', 'the', 'hers', 'herself', "that'll", "you'll", 'most', 'being', 'i', 'theirs', "you're", "wouldn't", 'few', 'to', 'through', 'from', 'himself', 'myself', 'you', 'our', 'doesn', 'between', 'until', 'd', 'my', 'those', 'o', 'because', 'once', "you'd", "aren't", 'that', 'just', 'were', 'here', 'their', 'weren', 'am', "shan't", 'it', 'what', 'and', 'hasn', 'by', 'with', 'very', 'same', 've', 'this', 'whom', 'these', 'too', 'm', "shouldn't", 'wasn', 'than', 'was', "isn't", 'mustn', "weren't", 'ain', 'having', 'ma', 'but', "it's", 'been', 'out', 'nor', 'while', 'me', 'we', "wasn't", 're', 'needn', 'into', "mustn't", 'hadn', 'or', "mightn't", 'will', 'be', 'themselves', 'him', "you've", 'does', 'for', 'as', 'after', 'where', 'about', 'other', 'wouldn', 'below', "don't", 'll', 'yourself', 'only', 'did', 'her'}
 
 
 class Indexer:
@@ -32,6 +30,7 @@ class Indexer:
         self.stemmer = Stemmer.Stemmer('english')
         self.root_path = 'tmp/' if root_path is None else root_path
         self._prev_time = time.time()
+        self._tot_tokens, self._inv_tokens = 0, 0
         self.stemmed_words = dict()
 
         if not path.isdir(self.root_path):
@@ -44,6 +43,7 @@ class Indexer:
         field_data = self.parser.parse(content)
         for field, information in field_data.items():
             self.index[field] = self.preprocess(information)
+            self._tot_tokens += len(self.index[field])
         self.index['title'] = self.preprocess(title)
         self._make_index()
         self.index = defaultdict()
@@ -60,6 +60,10 @@ class Indexer:
         self.index = defaultdict()
         self.cur_content = None
 
+    def write_stats(self, fname):
+        with open(fname, 'w') as f:
+            f.write(str(self._tot_tokens)+'\n'+str(self._inv_tokens))
+
     def _reset(self):
         self.inv_index = defaultdict(list)
         self.titles = []
@@ -71,6 +75,7 @@ class Indexer:
         idx_content = []
         for w in sorted(self.inv_index.keys()):
             idx_content.append(w + ':' + ''.join(self.inv_index[w]))
+            self._inv_tokens += 1
         idx_content = '\n'.join(idx_content)
 
         with open(path.join(self.root_path, f'idx{self._file_id}.txt'), 'w') as f:
