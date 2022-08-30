@@ -1,4 +1,12 @@
 .idea/
 venv/
 .venv/
-
+.dataset/
+dataset/
+test.txt
+test/
+final/
+test.*
+__pycache__/
+tmp/
+gen_test.py
