@@ -1,4 +1,5 @@
 from collections import defaultdict, Counter
+import re
 from nltk.tokenize import word_tokenize, sent_tokenize, regexp_tokenize
 import time
 import os
@@ -13,7 +14,7 @@ stops = {"couldn't", 'them', 'if', 'off', 'not', "needn't", 'ours', 'had', 'now'
 class Indexer:
     """Indexes the corpus using inverted indexing"""
 
-    def __init__(self, content_parser, root_path=None):
+    def __init__(self, content_parser, root_path=None, final_path=None):
         """Creates an inverted index from documents
         :param content_parser: parses document with custom formatting
         :param root_path: folder to store index files in
@@ -29,6 +30,7 @@ class Indexer:
         self.doc = None
         self.stemmer = Stemmer.Stemmer('english')
         self.root_path = 'tmp/' if root_path is None else root_path
+        self.target = 'final/' if final_path is None else final_path
         self._prev_time = time.time()
         self._tot_tokens, self._inv_tokens = 0, 0
         self.stemmed_words = dict()
@@ -40,10 +42,11 @@ class Indexer:
         self.titles.append(title.encode('ascii', errors='ignore').decode())
         self.cur_content = content.encode('ascii', errors='ignore').decode()
 
-        field_data = self.parser.parse(content)
+        field_data = self.parser.parse(self.cur_content)
         for field, information in field_data.items():
             self.index[field] = self.preprocess(information)
             self._tot_tokens += len(self.index[field])
+        
         self.index['title'] = self.preprocess(title)
         self._make_index()
         self.index = defaultdict()
@@ -81,7 +84,7 @@ class Indexer:
         with open(path.join(self.root_path, f'idx{self._file_id}.txt'), 'w') as f:
             f.write(idx_content)
 
-        with open(path.join(self.root_path, f'title{self._file_id}.txt'), 'w') as f:
+        with open(path.join(self.target, f'title{self._file_id}.txt'), 'w') as f:
             f.write('\n'.join(self.titles))
 
         self._file_id += 1
@@ -101,6 +104,9 @@ class Indexer:
 
     def preprocess(self, data=None):
         """Performs all the text pre-processing for current content held"""
+        data = data.lower()
+        data = re.sub(r'https?://\S+|&nbsp|&lt|&gt|&amp|&quot|&apos|\S*\d\S*', '', data)
+        data = re.sub(r'[^a-z]', ' ', data)
         data = self.tokenize(data)
         data = [t for t in data if t not in stops]
         data = self.stemmer.stemWords(data)

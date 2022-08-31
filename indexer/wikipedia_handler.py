@@ -56,7 +56,8 @@ class WikipediaParser:
 
         for field, function in self.fields.items():
             data = function()
-            res[field] = self._clean(data)
+            res[field] = data
+            # res[field] = self._clean(data)
 
         return res
 

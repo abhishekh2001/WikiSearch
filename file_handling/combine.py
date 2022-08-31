@@ -60,7 +60,7 @@ def combine(write_loc):
             dest = os.path.join(write_loc, f"final{fnum}.txt")
             print(f"Writing to file {dest}")
 
-            with open(dest, "r") as f:
+            with open(dest, "w") as f:
                 for w, v in inv_dict.items():
                     f.write(f"{w}:{v}\n")
             fnum += 1
@@ -70,7 +70,7 @@ def combine(write_loc):
         dest = os.path.join(write_loc, f"final{fnum}.txt")
         print(f"Writing to file {dest}")
 
-        with open(dest, 'r') as f:
+        with open(dest, 'w') as f:
             for w, v in inv_dict.items():
                 f.write(f"{w}:{v}\n")
         fnum += 1
