@@ -7,7 +7,7 @@ import config
 
 def gen_v_doclist(v, fields) -> list:
     """Given encoded index value, return list of docs and score"""
-    vsplit = v.split('d')[1:][:100000]
+    vsplit = v.split('d')[1:][:config.NUM_DOCS_PER_QUERY_WORD]
     print(v[:30], vsplit[:2])
     res_docs = []
     for dv in vsplit:

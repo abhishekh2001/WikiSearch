@@ -87,8 +87,8 @@ class WikipediaParser:
         return infobox
 
     def _category(self):
-        t = re.findall(r'(\[\[category.*?]])', self.content)
-        t = ' '.join([re.sub(r'\[\[category:', '', x) for x in t])
+        t = re.findall(r'(\[\[category.*?]])', self.content, flags=re.DOTALL)
+        t = ' '.join([re.sub(r'\[\[category:', '', x, flagss=re.DOTALL) for x in t])
         return t
 
     def _links(self):
