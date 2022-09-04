@@ -22,7 +22,7 @@ if __name__ == '__main__':
     stats_loc = sys.argv[3]
 
     st = time.time()
-    run_et(docsrc, config.INTER, stats_loc, 'final')
+    run_et(docsrc, config.INTER, stats_loc, destination)
     en = time.time()
     print('Completed indexing in', (en - st))
 
