@@ -1,4 +1,6 @@
-# IRE - Mini Project
+# WikiSearch
+
+A search engine to query over wikipedia articles. 
 
 ## Directory structure
 The code is structured as follows -
