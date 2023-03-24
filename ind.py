@@ -7,9 +7,9 @@ from indexer.indexer import Indexer
 from file_handling import combine
 
 
-def run_et(docsrc, destination, stats_loc):
+def run_et(docsrc, destination, stats_loc, final_path):
     wikiparser = WikipediaParser()
-    idxr = Indexer(wikiparser, destination)
+    idxr = Indexer(wikiparser, destination, final_path=final_path)
     p = Parse(docsrc, idxr)
 
     idxr.dump()
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     stats_loc = sys.argv[3]
 
     st = time.time()
-    run_et(docsrc, config.INTER, stats_loc)
+    run_et(docsrc, config.INTER, stats_loc, destination)
     en = time.time()
     print('Completed indexing in', (en - st))
 
